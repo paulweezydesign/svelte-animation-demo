@@ -1,0 +1,39 @@
+<script>
+  import syncHeight from "../syncHeight";
+  import { spring } from "svelte/motion";
+
+  let el;
+  let shown = false;
+  let open = true;
+  let secondParagraph = false;
+
+  const getConfig = val => {
+    let active = typeof val === "number";
+    let immediate = !shown && active;
+    //once we've had a proper height registered, we can animate in the future
+    shown = shown || active;
+    return immediate ? { hard: true } : {};
+  };
+
+  const heightSpring = spring(0, { stiffness: 0.1, damping: 0.3 });
+  $: heightStore = syncHeight(el);
+  $: heightSpring.set(open ? $heightStore || 0 : 0, getConfig($heightStore));
+
+  const toggleOpen = () => (open = !open);
+  const toggleSecondParagraph = () => (secondParagraph = !secondParagraph);
+</script>
+
+<button on:click={toggleOpen}>Toggle</button>
+<button on:click={toggleSecondParagraph}>Toggle More</button>
+
+<div style="overflow: hidden; height: {$heightSpring}px">
+  <div bind:this={el}>
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
+    <br />
+    {#if secondParagraph}
+    <div>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?</div>
+    {/if}
+  </div>
+</div>
+
+<hr />
